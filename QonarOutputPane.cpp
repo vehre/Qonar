@@ -82,7 +82,7 @@ namespace Qonar
 
         QString QonarOutputPane::displayName() const
         {
-            return QT_TRANSLATE_NOOP("Qonar::Internal::QonarOutputPane", QString::fromUtf8("Sonar Entries"));
+            return QString::fromUtf8("Qonar");
         }
 
         int QonarOutputPane::priorityInStatusBar() const
