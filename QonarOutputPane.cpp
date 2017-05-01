@@ -230,7 +230,7 @@ namespace Qonar
 
             m_configureButton = createCheckableToolButton("Settings",
                                                           "Edit Qonar settings for the current Project",
-                                                          Utils::Icons::INFO_TOOLBAR.icon());
+                                                          QIcon::fromTheme("preferences-system"));
             m_configureButton->setCheckable(false);
             m_refreshButton->connect(m_configureButton,
                                      SIGNAL(clicked()),
