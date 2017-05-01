@@ -65,7 +65,8 @@ RESOURCES += \
 QMAKE_CXXFLAGS *= -Wall -Werror
 
 DISTFILES += \
-    sonar-project.properties
+    sonar-project.properties \
+    README.md
 
 FORMS += \
     QonarSettings.ui

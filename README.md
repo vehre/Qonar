@@ -1,6 +1,19 @@
-# Qonar
+Qonar
 =======
 Sonar plugin for QtCreator
 
 This plugin connects QtCreator with a SonarQube server. 
 It is widely inspired by the TODO plugin. 
+
+### build
+To build this plugin (like every QtCreator plugin) you need to have QtCreator source tree and build tree available.
+    mkdir Qonar-build
+    cd Qonar-build
+    export QTC_SOURCE=PATH_TO_QtCreator_SOURCES
+    export QTC_BUILD=PATH_TO_QtCreator_BUILD_DIR
+    qmake -r PATH/TO/SOURCES/qonar.pro
+    make
+While building, it automatically installs itself in the user directory for QtCreator to find it.
+
+Do not forget to activate the plugin in QtCreator :
+    Help => About Plugins => Check the plugin
