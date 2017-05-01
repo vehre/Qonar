@@ -1,0 +1,11 @@
+{
+    \"Name\" : \"Qonar\",
+    \"Version\" : \"0.0.1\",
+    \"CompatVersion\" : \"0.0.1\",
+    \"Vendor\" : \"JulienPILLON\",
+    \"Copyright\" : \"(C) Julien PILLON\",
+    \"License\" : \"GPLv3\",
+    \"Description\" : \"Sonar plugin for QtCreator\",
+    \"Url\" : \"\",
+    $$dependencyList
+}

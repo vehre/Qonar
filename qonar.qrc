@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="blocker">images/blocker.png</file>
+        <file alias="critical">images/critical.png</file>
+        <file alias="info">images/info.png</file>
+        <file alias="major">images/major.png</file>
+        <file alias="minor">images/minor.png</file>
+    </qresource>
+</RCC>
