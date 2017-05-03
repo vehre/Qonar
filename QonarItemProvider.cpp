@@ -180,7 +180,7 @@ namespace Qonar
                     {
                         QJsonObject issue = val.toObject();
                         QonarItem   item;
-                        item.issueType = m_sonarToQonar[issue["sseverity"].toString()];
+                        item.issueType = m_sonarToQonar[issue["severity"].toString()];
                         item.status = issue["status"].toString();
                         item.user = issue["author"].toString();
                         item.text = issue["message"].toString();
