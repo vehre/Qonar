@@ -26,3 +26,4 @@ Do not forget to activate the plugin in QtCreator :
 ### TODO
     * Add authentication. 
     * Centralize Sonar API usage
+    * Page management (Sonar limits to 500 issues max)
