@@ -22,3 +22,8 @@ While building, it automatically installs itself in the user directory for QtCre
 Do not forget to activate the plugin in QtCreator :
 
     Help => About Plugins => Check the plugin
+
+### TODO
+    * Add authentication. 
+    * Centralize Sonar API usage
+    * Page management (Sonar limits to 500 issues max)
