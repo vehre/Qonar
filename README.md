@@ -24,6 +24,7 @@ Do not forget to activate the plugin in QtCreator :
     Help => About Plugins => Check the plugin
 
 ### TODO
-    * Add authentication. 
-    * Centralize Sonar API usage
+    * Add authentication. => Implemented, but not tested yet. 
     * Page management (Sonar limits to 500 issues max)
+    * Add in app resolution (false positive etc.)
+    
