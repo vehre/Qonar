@@ -27,64 +27,28 @@ namespace Qonar
     namespace Internal
     {
         class QonarModel;
+        class QonarSonar;
         class QonarItemProvider:public QObject
         {
             Q_OBJECT
 
             public:
-                explicit QonarItemProvider(QObject* parent = 0);
-
-                void setUrl(const QString& url);
-
-                void setUrl(const QUrl& url);
-
-                QString server() const;
-
-                void setServer(const QString& server);
-
-                int server_port() const;
-
-                void setServer_port(int server_port);
-
-                QString server_path() const;
-
-                void setServer_path(const QString& server_path);
-
-                QString project() const;
-
-                void setProject(const QString& project);
-
-                QString scheme() const;
-
-                void setScheme(const QString& scheme);
+                explicit QonarItemProvider(QonarSonar* qonarSonar);
 
                 QonarModel* getItemsModel() const;
 
             signals:
             public slots:
                 void refreshSilent();
+
                 void refreshVerbose();
 
-                void refreshDone(QNetworkReply* reply);
-
             private:
-                void refresh(bool silent=false);
-                void getUrl(const QUrl& url);
+                void refresh(bool silent = false);
 
-                QString                                             m_server;
-                QString                                             m_scheme;
-                int                                                 m_server_port;
-                QString                                             m_server_path;
-                QString                                             m_project;
-                QString                                             m_projectDir;
-                QNetworkAccessManager*                              p_nam;
-                QList<QonarItem>                                    m_itemList;
-                QonarModel*                                         m_itemsModel;
-                static const QString                                m_api_issue;
-                static const QString                                m_project_arg;
-                static const QString                                m_resolved_arg;
-                static const QString                                m_resolved_value;
-                static const QHash<QString, Constants::IssueType>   m_sonarToQonar;
+                QonarSonar*     ptr_qonarSonar;
+                QList<QonarItem>m_itemList;
+                QonarModel*     m_itemsModel;
         };
     } // namespace Internal
 } // namespace Qonar

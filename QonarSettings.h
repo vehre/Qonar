@@ -31,31 +31,29 @@ namespace Qonar
 {
     namespace Internal
     {
+        class QonarSonar;
+
         class QonarSettings:public QDialog
         {
             Q_OBJECT
 
             public:
-                explicit QonarSettings(QWidget* parent = 0);
+                explicit QonarSettings(QonarSonar* qonarSonar, QWidget* parent = 0);
                 ~QonarSettings();
-                void setUrl(const QString& url);
-                QString url() const;
-                void setProject(const QString& projectKey);
-                QString project() const;
 
             private slots:
                 void refreshProjects();
-
-                void refreshProjectsDone(QNetworkReply* reply);
-
+            public slots:
+                virtual void accept();
+                virtual void reject();
             private:
-                void getUrl(const QUrl& url);
-
+                void readSettings();
+                void updateSettings();
                 Ui::QonarSettings*      ui;
-                QNetworkAccessManager*  p_nam;
                 QStringList             m_projectsKeys;
-                volatile bool           m_reply_finished;
-                static const QString    m_api_project;
+                QonarSonar*             ptr_qonarSonar;
+                QString                 m_orig_url;
+                QString                 m_orig_project;
         };
     } // namespace Internal
 } // namespace Qonar

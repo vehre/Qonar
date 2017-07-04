@@ -23,21 +23,22 @@
 #include <QNetworkReply>
 #include <QUrl>
 #include <QUrlQuery>
+#include <projectexplorer/project.h>
+#include <projectexplorer/projecttree.h>
+#include "QonarSonar.h"
 
 namespace Qonar
 {
     namespace Internal
     {
-        const QString QonarSettings::m_api_project = "api/projects/index";
-        QonarSettings::QonarSettings(QWidget* parent):
+        QonarSettings::QonarSettings(QonarSonar* qonarSonar, QWidget* parent):
             QDialog(parent),
             ui(new Ui::QonarSettings),
-            p_nam(new QNetworkAccessManager(this))
+            ptr_qonarSonar(qonarSonar)
         {
-            m_reply_finished = false;
             ui->setupUi(this);
             connect(ui->lineEdit,   SIGNAL(editingFinished()),          this,   SLOT(refreshProjects()));
-            connect(p_nam,          SIGNAL(finished(QNetworkReply*)),   this,   SLOT(refreshProjectsDone(QNetworkReply*)));
+            readSettings();
         }
 
         QonarSettings::~QonarSettings()
@@ -45,76 +46,59 @@ namespace Qonar
             delete ui;
         }
 
-        void QonarSettings::setUrl(const QString& url)
+        void QonarSettings::refreshProjects()
         {
-            ui->lineEdit->setText(url);
-            refreshProjects();
-            while(!m_reply_finished)
-                qApp->processEvents();
+            updateSettings();
+            ui->comboBox->clear();
+            m_projectsKeys.clear();
+            QMap<QString, QString> projects = ptr_qonarSonar->projects();
+            for(QString key : projects.keys())
+            {
+                ui->comboBox->addItem(projects[key]);
+                m_projectsKeys.append(key);
+            }
         }
 
-        QString QonarSettings::url() const
+        void QonarSettings::accept()
         {
-            return ui->lineEdit->text();
+            updateSettings();
+            QDialog::accept();
         }
 
-        void QonarSettings::setProject(const QString& projectKey)
+        void QonarSettings::reject()
         {
-            int index = m_projectsKeys.indexOf(projectKey);
+            ProjectExplorer::ProjectTree* tree = ProjectExplorer::ProjectTree::instance();
+            if(!tree) return;
+            ProjectExplorer::Project* current_project = tree->currentProject();
+            current_project->setNamedSettings(QonarSonar::m_qonar_url_settings, m_orig_url);
+            current_project->setNamedSettings(QonarSonar::m_qonar_project_settings, m_orig_project);
+            QDialog::reject();
+        }
 
+        void QonarSettings::readSettings()
+        {
+            ProjectExplorer::ProjectTree* tree = ProjectExplorer::ProjectTree::instance();
+            if(!tree) return;
+            ProjectExplorer::Project* current_project = tree->currentProject();
+            if(!current_project) return;
+            m_orig_project = current_project->namedSettings(QonarSonar::m_qonar_project_settings).toString();
+            m_orig_url = current_project->namedSettings(QonarSonar::m_qonar_url_settings).toString();
+            ui->lineEdit->setText(m_orig_url);
+            int index = m_projectsKeys.indexOf(m_orig_project);
             ui->comboBox->setCurrentIndex(index);
         }
 
-        QString QonarSettings::project() const
+        void QonarSettings::updateSettings()
         {
-            return m_projectsKeys[ui->comboBox->currentIndex()];
-        }
-
-        void QonarSettings::refreshProjects()
-        {
-            m_reply_finished = false;
-            QUrl url(ui->lineEdit->text());
-            QString path = url.path() + "/" + m_api_project;
-            url.setPath(path);
-            QUrlQuery query;
-            query.addQueryItem("format", "json");
-            url.setQuery(query);
-                    getUrl(url);
-        }
-
-        void QonarSettings::refreshProjectsDone(QNetworkReply* reply)
-        {
-            ui->comboBox->clear();
-            m_projectsKeys.clear();
-            if(reply->error() == QNetworkReply::NoError)
-            {
-                int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-                if((status == 301) || (status == 302))
-                {
-                    getUrl(reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl());
-                } else {
-                    // Read the result
-                    QJsonDocument   response = QJsonDocument::fromJson(reply->readAll());
-                    QJsonArray      projects = response.array();
-                    for(const QJsonValue& val : projects)
-                    {
-                        QJsonObject project = val.toObject();
-                        ui->comboBox->addItem(project["nm"].toString());
-                        m_projectsKeys.append(project["k"].toString());
-                    }
-                    m_reply_finished = true;
-                }
-            } else {
-                // TODO error handling
-                qDebug() << "ERROR" << reply->error();
-                m_reply_finished = true;
-            }
-        } // refreshProjectsDone
-
-        void QonarSettings::getUrl(const QUrl& url)
-        {
-            qDebug() << url;
-            p_nam->get(QNetworkRequest(url));
+            ProjectExplorer::ProjectTree* tree = ProjectExplorer::ProjectTree::instance();
+            if(!tree) return;
+            ProjectExplorer::Project* current_project = tree->currentProject();
+            if(!current_project) return;
+            current_project->setNamedSettings(QonarSonar::m_qonar_url_settings, ui->lineEdit->text());
+            int index = ui->comboBox->currentIndex();
+            if(m_projectsKeys.size() > 0 && index >= 0)
+                current_project->setNamedSettings(QonarSonar::m_qonar_project_settings, m_projectsKeys[index]);
+            current_project->saveSettings();
         }
     } // namespace Internal
 } // namespace Qonar

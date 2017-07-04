@@ -8,7 +8,8 @@ SOURCES += qonarplugin.cpp \
     QonarItem.cpp \
     QonarOutputTreeView.cpp \
     QonarItemProvider.cpp \
-    QonarSettings.cpp
+    QonarSettings.cpp \
+    QonarSonar.cpp
 
 HEADERS += qonarplugin.h \
         qonar_global.h \
@@ -18,7 +19,8 @@ HEADERS += qonarplugin.h \
     Constants.h \
     QonarOutputTreeView.h \
     QonarItemProvider.h \
-    QonarSettings.h
+    QonarSettings.h \
+    QonarSonar.h
 
 OTHER_FILES *= uncrustify.cfg header
 

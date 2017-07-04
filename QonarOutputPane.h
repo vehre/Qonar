@@ -37,6 +37,7 @@ namespace Qonar
         class QonarModel;
         class QonarItem;
         class QonarItemProvider;
+        class QonarSonar;
         class QonarOutputPane:public Core::IOutputPane
         {
             Q_OBJECT
@@ -108,6 +109,7 @@ namespace Qonar
                 QTreeView*              m_qonarTreeView;
                 QonarModel*             m_qonarItemsModel;
                 QonarItemProvider*      m_qonarItemProvider;
+                QonarSonar*             m_qonarSonar;
                 QSortFilterProxyModel*  m_filteredQonarItemsModel;
                 QToolButtonList         m_filterButtons;
                 QToolButton*            m_refreshButton;

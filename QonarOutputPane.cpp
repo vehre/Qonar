@@ -34,6 +34,7 @@
 #include "Constants.h"
 #include "QonarItem.h"
 #include "QonarItemProvider.h"
+#include "QonarSonar.h"
 #include "QonarModel.h"
 #include "QonarOutputTreeView.h"
 #include "QonarSettings.h"
@@ -45,7 +46,8 @@ namespace Qonar
         QonarOutputPane::QonarOutputPane(QObject* parent):
             Core::IOutputPane(parent)
         {
-            m_qonarItemProvider = new QonarItemProvider(this);
+            m_qonarSonar = new QonarSonar(this);
+            m_qonarItemProvider = new QonarItemProvider(m_qonarSonar);
             createTreeView();
             createScopeButtons();
             ProjectExplorer::ProjectTree* tree = ProjectExplorer::ProjectTree::instance();
@@ -165,18 +167,10 @@ namespace Qonar
                                         tr( "No current project available. "));
                 return;
             }
-            QString pUrl = current_project->namedSettings("qonar_url").toString();
-            QString pProject = current_project->namedSettings("qonar_project").toString();
 
-            QonarSettings* settings = new QonarSettings(Core::ICore::mainWindow());
-            settings->setUrl(pUrl);
-            settings->setProject(pProject);
+            QonarSettings* settings = new QonarSettings(m_qonarSonar, Core::ICore::mainWindow());
             settings->show();
-            if(settings->exec() == QDialog::Accepted)
-            {
-                current_project->setNamedSettings("qonar_url", settings->url());
-                current_project->setNamedSettings("qonar_project", settings->project());
-            }
+            settings->exec();
             delete settings;
         }
 
