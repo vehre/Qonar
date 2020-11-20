@@ -38,7 +38,7 @@ namespace Qonar
         const QString                               QonarSonar::m_api_issues_project_arg = "projectKeys";
         const QString                               QonarSonar::m_api_issues_resolved_arg = "resolved";
         const QString                               QonarSonar::m_api_issues_resolved_value = "false";
-        const QString                               QonarSonar::m_api_project = "api/projects/index";
+        const QString                               QonarSonar::m_api_project = "api/projects/search";
         const QString                               QonarSonar::m_json_project_name = "name";
         const QString                               QonarSonar::m_json_project_key = "key";
         const QString                               QonarSonar::m_json_issues = "issues";
