@@ -104,7 +104,7 @@ namespace Qonar
         QonarPlugin::createQonarOutputPane()
         {
             m_qonarPane = new QonarOutputPane();
-            addAutoReleasedObject(m_qonarPane);
+            //addAutoReleasedObject(m_qonarPane);
             connect(m_qonarPane, &QonarOutputPane::qonarItemClicked,
                     this, &QonarPlugin::qonarItemClicked);
         }

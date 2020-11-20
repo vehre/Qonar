@@ -83,9 +83,9 @@ namespace Qonar
 
                     if(role == Qt::BackgroundColorRole) res = item.color;
 
-                    if(role == Qt::TextColorRole) res = Utils::creatorTheme()->color(Utils::Theme::TodoItemTextColor);
+                    if(role == Qt::TextColorRole) res = Utils::creatorTheme()->color(Utils::Theme::MenuItemTextColorNormal);
 
-                    if(role == Qt::ForegroundRole) res = Utils::creatorTheme()->color(Utils::Theme::TodoItemTextColor);
+                    if(role == Qt::ForegroundRole) res = Utils::creatorTheme()->color(Utils::Theme::MenuItemTextColorNormal);
 
                     if(role == Qt::DisplayRole)
                         switch(Constants::OutputColumnIndex(index.column()))
