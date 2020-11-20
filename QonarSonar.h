@@ -81,7 +81,8 @@ namespace Qonar
                 static const QString                                m_json_status;
                 static const QString                                m_json_author;
                 static const QString                                m_json_message;
-                static const QString                                m_json_file;
+                static const QString                                m_json_component;
+                static const QString                                m_json_components;
                 static const QString                                m_json_line;
                 static const QHash<QString, Constants::IssueType>   m_sonarToQonar;
             public:

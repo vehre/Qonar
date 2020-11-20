@@ -39,14 +39,15 @@ namespace Qonar
         const QString                               QonarSonar::m_api_issues_resolved_arg = "resolved";
         const QString                               QonarSonar::m_api_issues_resolved_value = "false";
         const QString                               QonarSonar::m_api_project = "api/projects/index";
-        const QString                               QonarSonar::m_json_project_name = "nm";
-        const QString                               QonarSonar::m_json_project_key = "k";
+        const QString                               QonarSonar::m_json_project_name = "name";
+        const QString                               QonarSonar::m_json_project_key = "key";
         const QString                               QonarSonar::m_json_issues = "issues";
         const QString                               QonarSonar::m_json_severity = "severity";
         const QString                               QonarSonar::m_json_status = "status";
         const QString                               QonarSonar::m_json_author = "author";
         const QString                               QonarSonar::m_json_message = "message";
-        const QString                               QonarSonar::m_json_file = "component";
+        const QString                               QonarSonar::m_json_component = "component";
+        const QString                               QonarSonar::m_json_components = "components";
         const QString                               QonarSonar::m_json_line = "line";
 
         const QString                               QonarSonar::m_qonar_url_settings = "qonar_url";
@@ -85,9 +86,11 @@ namespace Qonar
             QString path = url.path() + "/" + m_api_project;
 
             url.setPath(path);
-                    sendRequest(url);
+            sendRequest(url);
+
+            QJsonObject object = m_document.object();
             QMap<QString, QString> result;
-            for(const QJsonValue& val : m_document.array())
+            for(const QJsonValue& val : object[m_json_components].toArray())
             {
                 QJsonObject project = val.toObject();
                 result[project[m_json_project_key].toString()] = project[m_json_project_name].toString();
@@ -119,7 +122,7 @@ namespace Qonar
             query.addQueryItem(m_api_issues_project_arg, m_project);
             query.addQueryItem(m_api_issues_resolved_arg, m_api_issues_resolved_value);
             url.setQuery(query);
-                    sendRequest(url);
+            sendRequest(url);
             if(!m_error)
             {
                 QJsonObject object = m_document.object();
@@ -132,7 +135,7 @@ namespace Qonar
                     item.status = issue[m_json_status].toString();
                     item.user = issue[m_json_author].toString();
                     item.text = issue[m_json_message].toString();
-                    QStringList file = issue[m_json_file].toString().split(":");
+                    QStringList file = issue[m_json_component].toString().split(":");
                     item.file = Utils::FileName::fromString(m_projectDir + QDir::separator() + file.last());
                     item.line = issue[m_json_line].toInt();
                     itemlist.append(item);
@@ -154,20 +157,24 @@ namespace Qonar
 
             m_document = QJsonDocument();
 
-            QUrlQuery query(url.query());
-
-            // force format to json...
-            while(query.hasQueryItem(m_format_arg)) query.removeQueryItem(m_format_arg);
-            query.addQueryItem(m_format_arg, m_format_value);
-            url.setQuery(query);
+            QNetworkRequest networkRequest(url);
+            //force json format response
+            networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
 
             if(m_credentials_ok)
             {
-                url.setUserName(m_username);
-                url.setPassword(m_password);
+                //url.setUserName(m_username);
+                ///url.setPassword(m_password);
+
+                QString concatenated = m_username + ":" + m_password;
+                QByteArray data = concatenated.toLocal8Bit().toBase64();
+                QString headerData = "Basic ";
+                headerData = headerData + data;
+                networkRequest.setRawHeader("Authorization", headerData.toLocal8Bit());
             }
 
-            p_nam->get(QNetworkRequest(url));
+            p_nam->get(networkRequest);
+
             while(!m_reply_finished) qApp->processEvents();
         }
 
