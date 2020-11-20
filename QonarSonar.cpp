@@ -49,6 +49,7 @@ namespace Qonar
         const QString                               QonarSonar::m_json_component = "component";
         const QString                               QonarSonar::m_json_components = "components";
         const QString                               QonarSonar::m_json_line = "line";
+        const QString                               QonarSonar::m_credential_file = "/home/developer/.qonar.crd";
 
         const QString                               QonarSonar::m_qonar_url_settings = "qonar_url";
         const QString                               QonarSonar::m_qonar_project_settings = "qonar_project";
@@ -161,6 +162,10 @@ namespace Qonar
             //force json format response
             networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
 
+            if(!m_credentials_ok) {
+                m_credentials_ok = readCredentials();
+            }
+
             if(m_credentials_ok)
             {
                 //url.setUserName(m_username);
@@ -217,6 +222,7 @@ namespace Qonar
                         if(ok)
                         {
                             m_credentials_ok = true;
+                            writeCredentials();
                             sendRequest(m_last_url);
                         }
                     }
@@ -244,5 +250,36 @@ namespace Qonar
             m_url = current_project->namedSettings(m_qonar_url_settings).toString();
             m_project = current_project->namedSettings(m_qonar_project_settings).toString();
         } // requestFinished
+
+        bool QonarSonar::readCredentials()
+        {
+            QFileInfo file_info(m_credential_file);
+            if (file_info.exists() && file_info.isFile()) {
+                QFile file(m_credential_file);
+                if(file.open(QIODevice::ReadOnly)) {
+                    QTextStream stream(&file);
+                    m_username = stream.readLine();
+                    m_password = stream.readLine();
+                    file.close();
+                    return true;
+                }
+                file.close();
+                return false;
+            }
+            else {
+                return false;
+            }
+        }
+
+        void QonarSonar::writeCredentials()
+        {
+            QFile file(m_credential_file);
+            if(file.open(QIODevice::WriteOnly))
+            {
+                QTextStream stream(&file);
+                stream << m_username << '\n' << m_password << '\n';
+                file.close();
+            }
+        }
     } // namespace Internal
 } // namespace Qonar

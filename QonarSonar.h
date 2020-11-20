@@ -54,6 +54,8 @@ namespace Qonar
 
             private:
                 void readSettings();
+                bool readCredentials();
+                void writeCredentials();
                 QJsonDocument           m_document;
                 bool                    m_silent;
                 QNetworkAccessManager*  p_nam;
@@ -85,6 +87,7 @@ namespace Qonar
                 static const QString                                m_json_components;
                 static const QString                                m_json_line;
                 static const QHash<QString, Constants::IssueType>   m_sonarToQonar;
+                static const QString                                m_credential_file;
             public:
                 static const QString                                m_qonar_url_settings;
                 static const QString                                m_qonar_project_settings;
