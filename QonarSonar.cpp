@@ -49,7 +49,7 @@ namespace Qonar
         const QString                               QonarSonar::m_json_component = "component";
         const QString                               QonarSonar::m_json_components = "components";
         const QString                               QonarSonar::m_json_line = "line";
-        const QString                               QonarSonar::m_credential_file = "/home/developer/.qonar.crd";
+        const QString                               QonarSonar::m_credential_file = ".config/qonar.crd";
 
         const QString                               QonarSonar::m_qonar_url_settings = "qonar_url";
         const QString                               QonarSonar::m_qonar_project_settings = "qonar_project";
@@ -137,7 +137,7 @@ namespace Qonar
                     item.user = issue[m_json_author].toString();
                     item.text = issue[m_json_message].toString();
                     QStringList file = issue[m_json_component].toString().split(":");
-                    item.file = Utils::FileName::fromString(m_projectDir + QDir::separator() + file.last());
+                    item.file = Utils::FilePath::fromString(m_projectDir + QDir::separator() + file.last());
                     item.line = issue[m_json_line].toInt();
                     itemlist.append(item);
                 }
@@ -158,20 +158,47 @@ namespace Qonar
 
             m_document = QJsonDocument();
 
+            if(!m_credentials_ok) {
+                m_credentials_ok = readCredentials();
+                if (!m_credentials_ok) {
+                    bool ok = false;
+                    m_organization = QInputDialog::getText(Core::ICore::mainWindow(),
+                                                       tr("Organization"),
+                                                       tr("Organization"),
+                                                       QLineEdit::Normal,
+                                                       tr("Please enter your organization name"),
+                                                       &ok);
+                    if(ok)
+                    {
+                        m_token = QInputDialog::getText(Core::ICore::mainWindow(),
+                                                           tr("Token"),
+                                                           tr("Token"),
+                                                           QLineEdit::Normal,
+                                                           tr("Please enter a security token"),
+                                                           &ok);
+                        if(ok)
+                        {
+                            writeCredentials();
+                            m_credentials_ok = true;
+                        }
+                    }
+                }
+            }
+
+            if (m_credentials_ok) {
+                QString qStr = url.query();
+                if (!qStr.isEmpty()) qStr += "&organization=" + m_organization;
+                else qStr += "organization=" + m_organization;
+                url.setQuery(qStr);
+            }
+
             QNetworkRequest networkRequest(url);
             //force json format response
             networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
 
-            if(!m_credentials_ok) {
-                m_credentials_ok = readCredentials();
-            }
-
             if(m_credentials_ok)
             {
-                //url.setUserName(m_username);
-                ///url.setPassword(m_password);
-
-                QString concatenated = m_username + ":" + m_password;
+                QString concatenated = m_token + ":";
                 QByteArray data = concatenated.toLocal8Bit().toBase64();
                 QString headerData = "Basic ";
                 headerData = headerData + data;
@@ -201,23 +228,23 @@ namespace Qonar
                 }
             } else {
                 // TODO error handling
-                if(status == 401)
+                if(status == 401 || status == 403)
                 {
                     m_credentials_ok = false;
                     bool ok = false;
-                    m_username = QInputDialog::getText(Core::ICore::mainWindow(),
-                                                       tr("Username"),
-                                                       tr("Username"),
+                    m_organization = QInputDialog::getText(Core::ICore::mainWindow(),
+                                                       tr("Organization"),
+                                                       tr("Organization"),
                                                        QLineEdit::Normal,
-                                                       tr("Please enter a username"),
+                                                       tr("Please enter your organization name"),
                                                        &ok);
                     if(ok)
                     {
-                        m_password = QInputDialog::getText(Core::ICore::mainWindow(),
-                                                           tr("Password"),
-                                                           tr("Password"),
-                                                           QLineEdit::Password,
-                                                           tr("Please enter a password"),
+                        m_token = QInputDialog::getText(Core::ICore::mainWindow(),
+                                                           tr("Token"),
+                                                           tr("Token"),
+                                                           QLineEdit::Normal,
+                                                           tr("Please enter a security token"),
                                                            &ok);
                         if(ok)
                         {
@@ -227,12 +254,12 @@ namespace Qonar
                         }
                     }
                 } else {
-                    qDebug() << "ERROR" << reply->error();
+                    qWarning() << "ERROR" << reply->error();
                     m_reply_finished = true;
                     m_error = true;
                     QMessageBox::critical(Core::ICore::mainWindow(),
                                           tr("Error Occured"),
-                                          tr("The folowing error occured : \n") + reply->errorString());
+                                          tr("The following error occured (status: %1): \n").arg(status) + reply->errorString());
                 }
             }
         }
@@ -249,17 +276,18 @@ namespace Qonar
 
             m_url = current_project->namedSettings(m_qonar_url_settings).toString();
             m_project = current_project->namedSettings(m_qonar_project_settings).toString();
-        } // requestFinished
+        } // readSettings
 
         bool QonarSonar::readCredentials()
         {
-            QFileInfo file_info(m_credential_file);
+            QString credential_file = qgetenv("HOME") + QDir::separator() + m_credential_file;
+            QFileInfo file_info(credential_file);
             if (file_info.exists() && file_info.isFile()) {
-                QFile file(m_credential_file);
+                QFile file(credential_file);
                 if(file.open(QIODevice::ReadOnly)) {
                     QTextStream stream(&file);
-                    m_username = stream.readLine();
-                    m_password = stream.readLine();
+                    m_organization = stream.readLine();
+                    m_token = stream.readLine();
                     file.close();
                     return true;
                 }
@@ -273,11 +301,12 @@ namespace Qonar
 
         void QonarSonar::writeCredentials()
         {
-            QFile file(m_credential_file);
+            QString credential_file = qgetenv("HOME") + QDir::separator() + m_credential_file;
+            QFile file(credential_file);
             if(file.open(QIODevice::WriteOnly))
             {
                 QTextStream stream(&file);
-                stream << m_username << '\n' << m_password << '\n';
+                stream << m_organization << '\n' << m_token << '\n';
                 file.close();
             }
         }

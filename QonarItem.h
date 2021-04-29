@@ -35,7 +35,7 @@ namespace Qonar
                 QString                 text;
                 QString                 user;
                 QString                 status;
-                Utils::FileName         file;
+                Utils::FilePath         file;
                 int                     line;
                 Constants::IssueType    issueType;
                 QColor                  color;

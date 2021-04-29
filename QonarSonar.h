@@ -66,8 +66,8 @@ namespace Qonar
                 QString                 m_project;
                 QString                 m_projectDir;
                 bool                    m_credentials_ok;
-                QString                 m_username;
-                QString                 m_password;
+                QString                 m_organization;
+                QString                 m_token;
 
                 static const QString                                m_format_arg;
                 static const QString                                m_format_value;

@@ -73,7 +73,7 @@ namespace Qonar
         {
             QVariant res;
 
-            if(index.isValid() and m_qonarItemsList)
+            if(index.isValid() && m_qonarItemsList)
             {
                 if(role == Qt::UserRole)
                 {
